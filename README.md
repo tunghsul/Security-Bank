@@ -1,6 +1,6 @@
 # Security-Bank
 
-
+### Note: For M1 Mac users, edit the docker-compose.yml file under services -> mysql_db -> add this "platform: linux/x86_64"
 ```
 cd client
 npm install
