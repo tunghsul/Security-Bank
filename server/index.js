@@ -6,7 +6,7 @@ const db = mysql.createPool({
   host: "mysql_db", // the host name MYSQL_DATABASE: node_mysql
   user: "MYSQL_USER", // database user MYSQL_USER: MYSQL_USER
   password: "MYSQL_PASSWORD", // database user password MYSQL_PASSWORD: MYSQL_PASSWORD
-  database: "books", // database name MYSQL_HOST_IP: mysql_db
+  database: "bank", // database name MYSQL_HOST_IP: mysql_db
 });
 
 const app = express();
@@ -30,7 +30,7 @@ app.post("/insert", (req, res) => {
   const bookName = req.body.username;
   const bookReview = req.body.password;
   const InsertQuery =
-    "INSERT INTO books_reviews (book_name, book_review) VALUES (?, ?)";
+    "INSERT INTO users (name, password) VALUES (?, ?)";
   db.query(InsertQuery, [bookName, bookReview], (err, result) => {
     console.log(result);
   });
