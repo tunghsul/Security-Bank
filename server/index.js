@@ -20,14 +20,6 @@ app.get("/", (req, res) => {
   res.send("Hi There");
 });
 
-// //get all of the books in the database
-// app.get("/get", (req, res) => {
-//   const SelectQuery = " SELECT * FROM books_reviews";
-//   db.query(SelectQuery, (err, result) => {
-//     res.send(result);
-//   });
-// });
-
 // register an account to the database
 app.post("/register", (req, res) => {
   const userName = req.body.username;
