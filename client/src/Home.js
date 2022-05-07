@@ -24,19 +24,19 @@ function Home() {
   }, []);
 
   const checkTextNull = () => {
-    if (username === "" || password === "") {
+    if (username === ""){ // || password === "") {
       if (username === "") {
         setUserErr(true);
       } else {
         setUserErr(false);
       }
 
-      if (password === "") {
-        setPwdErr(true);
-      } else {
-        setPwdErr(false);
-      }
-      return true;
+      // if (password === "") {
+      //   setPwdErr(true);
+      // } else {
+      //   setPwdErr(false);
+      // }
+      // return true;
     }
 
     return false;

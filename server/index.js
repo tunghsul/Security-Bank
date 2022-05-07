@@ -39,18 +39,22 @@ app.post("/register", (req, res) => {
 // login
 app.post("/login", (req, res) => {
   const userName = req.body.username;
-  const password = req.body.password;
+  let password = "";
+  if (req.body.password != null) {
+     password = req.body.password;
+  }
   const user = { name: userName };
-  const insertQuery =
-    "SELECT password FROM users WHERE name='" + userName + "';";
+  const insertQuery = 
+  "select name, password from users where name ='" + userName + "' and password ='" + password + "';";
 
   db.query(insertQuery, (err, result) => {
+    console.log("------->>>"+JSON.stringify(result));
     if (err) {
       res.sendStatus(400);
       return;
     }
 
-    if (result[0].password == password) {
+    if (result.length > 0 && result[0].password !== undefined) {
       const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "60s",
       });
