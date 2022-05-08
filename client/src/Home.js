@@ -7,6 +7,7 @@ import {
   Box,
   Typography,
   TextField,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import bg from "./images/bank-bg.jpeg";
@@ -27,6 +28,7 @@ function Home() {
   useEffect(() => {
     setUsername("");
     setPassword("");
+    setUserErr(false);
   }, [open]);
 
   const checkTextNull = () => {
@@ -43,7 +45,7 @@ function Home() {
       // } else {
       //   setPwdErr(false);
       // }
-      // return true;
+      return true;
     }
 
     return false;
@@ -67,14 +69,14 @@ function Home() {
       <Box
         sx={{
           backgroundColor: "rgba(0,0,0,0.7)",
-          borderRadius: "10px",
+          borderRadius: "5px",
           color: "white",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           padding: "30px",
-          width: "350px",
+          width: "380px",
         }}
       >
         <Typography
@@ -85,7 +87,7 @@ function Home() {
           component="div"
           gutterBottom
         >
-          {open ? "Login" : "Register"}
+          {open ? "Security Bank" : "Register Account"}
         </Typography>
         <Box
           sx={{
@@ -156,7 +158,7 @@ function Home() {
               },
               "& .MuiInput-root:after": {
                 borderBottom: "2px solid #ce8d0e",
-              }
+              },
             }}
           />
           <Box
@@ -197,14 +199,13 @@ function Home() {
                         setOpenErr(true);
                       });
                     console.log(username, password);
-                    
                   }}
                   sx={{
                     color: "white",
                     borderColor: "white",
                     ":hover": {
-                      border: "1px solid #ce8d0e"
-                    }
+                      border: "1px solid #ce8d0e",
+                    },
                   }}
                 >
                   Login
@@ -217,7 +218,7 @@ function Home() {
                     ":hover": {
                       background: "rgba(0,0,0,0)",
                       color: "#ce8d0e",
-                    }
+                    },
                   }}
                   onClick={(e) => {
                     setOpen(false);
@@ -262,8 +263,8 @@ function Home() {
                     color: "white",
                     border: "1px solid white",
                     ":hover": {
-                      border: "1px solid #ce8d0e"
-                    }
+                      border: "1px solid #ce8d0e",
+                    },
                   }}
                 >
                   Register
@@ -280,7 +281,7 @@ function Home() {
                     ":hover": {
                       background: "rgba(0,0,0,0)",
                       color: "#ce8d0e",
-                    }
+                    },
                   }}
                 >
                   Back
@@ -291,10 +292,15 @@ function Home() {
         </Box>
       </Box>
       <Snackbar
+        severity="error"
         open={openErr}
-        autoHideDuration={6000}
-        message="Failed login/register"
-      />
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          Failed login/register
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

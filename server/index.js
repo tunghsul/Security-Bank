@@ -3,7 +3,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const jwt_decode = require("jwt-decode");
 
 const db = mysql.createPool({
   host: "mysql_db", // the host name MYSQL_DATABASE: node_mysql
@@ -16,10 +16,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("Hi There");
-});
-
 // register an account to the database
 app.post("/register", (req, res) => {
   const userName = req.body.username;
@@ -29,10 +25,9 @@ app.post("/register", (req, res) => {
   db.query(InsertQuery, [userName, password], (err, result) => {
     console.log(result);
     if (err) {
-      res.sendStatus(400);
-      return;
+      return res.sendStatus(400);
     }
-    res.sendStatus(200);
+    return res.sendStatus(200);
   });
 });
 
@@ -40,33 +35,96 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const userName = req.body.username;
   let password = "";
-  if (req.body.password != null) {
-     password = req.body.password;
+  if (req.body.password != "") {
+    password = req.body.password;
   }
   const user = { name: userName };
-  const insertQuery = 
-  "select name, password from users where name ='" + userName + "' and password ='" + password + "';";
+  const insertQuery =
+    "select name, password from users where name ='" +
+    userName +
+    "' and password ='" +
+    password +
+    "';";
 
   db.query(insertQuery, (err, result) => {
-    console.log("------->>>"+JSON.stringify(result));
     if (err) {
-      res.sendStatus(400);
-      return;
+      return res.sendStatus(400);
     }
 
-    if (result.length > 0 && result[0].password !== undefined) {
-      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "60s",
-      });
-      res.status(200).send(JSON.stringify({ message: "success", accessToken }));
-    } else {
-      res.sendStatus(404);
+    if (result.length == 0 || result[0].password === undefined) {
+      return res.sendStatus(404);
     }
+
+    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "300s",
+    });
+    return res
+      .status(200)
+      .send(JSON.stringify({ message: "success", accessToken }));
   });
 });
 
-app.post("/account", authenticationToken, (req, res) => {
-  res.sendStatus(200);
+app.get("/account", authenticationToken, (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  const decoded = jwt_decode(token);
+  const username = decoded["name"];
+  if (username == null) {
+    return res.sendStatus(404);
+  }
+
+  const insertQuery = "select balance from users where name = ?";
+
+  db.query(insertQuery, [username], (err, result) => {
+    if (err) {
+      return res.sendStatus(400);
+    }
+
+    if (result.length == 0) {
+      return res.sendStatus(404);
+    }
+
+    const balance = result[0].balance;
+    return res
+      .status(200)
+      .send(JSON.stringify({ user: username, balance: balance }));
+  });
+});
+
+app.post("/deposit", authenticationToken, (req, res) => {
+  const userName = req.body.username;
+  const amount = req.body.amount;
+  const insertQuery =
+    "UPDATE users SET users.balance = users.balance + " +
+    amount +
+    " WHERE name='" +
+    userName +
+    "'";
+  db.query(insertQuery, (err, result) => {
+    if (err) {
+      return res.sendStatus(400);
+    }
+
+    return res.sendStatus(200);
+  });
+});
+
+app.post("/withdraw", authenticationToken, (req, res) => {
+  const userName = req.body.username;
+  const amount = req.body.amount;
+  const insertQuery =
+    "UPDATE users SET users.balance = users.balance - " +
+    amount +
+    " WHERE name='" +
+    userName +
+    "'";
+  db.query(insertQuery, (err, result) => {
+    if (err) {
+      return res.sendStatus(400);
+    }
+
+    return res.sendStatus(200);
+  });
 });
 
 function authenticationToken(req, res, next) {
@@ -86,44 +144,6 @@ function authenticationToken(req, res, next) {
     next();
   });
 }
-
-app.post("/deposit", authenticationToken, (req, res) => {
-  const userName = req.body.username;
-  const amount = req.body.amount;
-  const insertQuery =
-    "UPDATE users SET users.balance = users.balance + " +
-    amount +
-    " WHERE name='" +
-    userName +
-    "'";
-  db.query(insertQuery, (err, result) => {
-    if (err) {
-      res.sendStatus(400);
-      return;
-    }
-
-    res.sendStatus(200);
-  });
-});
-
-app.post("/withdraw", authenticationToken, (req, res) => {
-  const userName = req.body.username;
-  const amount = req.body.amount;
-  const insertQuery =
-    "UPDATE users SET users.balance = users.balance - " +
-    amount +
-    " WHERE name='" +
-    userName +
-    "'";
-  db.query(insertQuery, (err, result) => {
-    if (err) {
-      res.sendStatus(400);
-      return;
-    }
-
-    res.sendStatus(200);
-  });
-});
 
 app.listen("3001", () => {});
 
