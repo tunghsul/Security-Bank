@@ -1,11 +1,14 @@
-.App {
-  text-align: center;
+html {
+  height: 100%;
+  width: 100%;
 }
-.form{
-  display: inline-block;
-  justify-content: center;
+
+body {
+  height: 100%;
+  width: 100%;
 }
-.form input{
-  width: 250px;
-  margin: 10px;
+
+#root {
+  height: 100%;
+  width: 100%;
 }

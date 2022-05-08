@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-expressions */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Container, TextField, Typography, Button } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -10,6 +9,7 @@ function Home(props) {
   const [open, setOpen] = useState(false);
   const [username, settUsername] = useState(false);
   const [money, setMoney] = useState(0);
+  const divRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,63 +41,94 @@ function Home(props) {
           {open ? "Deposit" : "Withdraw"}
         </Typography>
         <Box>
-        <Button onClick={(e)=>{
-            setOpen(true);
-        }}>Go deposit</Button>
-        <Button onClick={(e)=>{
-            setOpen(false);
-        }}>Go withdraw</Button>
+          <Button
+            onClick={(e) => {
+              setOpen(true);
+            }}
+          >
+            Go deposit
+          </Button>
+          <Button
+            onClick={(e) => {
+              setOpen(false);
+            }}
+          >
+            Go withdraw
+          </Button>
         </Box>
-        <TextField id="outlined-basic" label="Outlined" variant="outlined" onChange={(e) => {
+        <TextField
+          id="outlined-basic"
+          label="Outlined"
+          variant="outlined"
+          onChange={(e) => {
             setMoney(e.target.value);
-        }}/>
+          }}
+        />
         {open ? (
           <Box>
             <Button
-            onClick={(e) => {
+              onClick={(e) => {
+                divRef.current.innerHTML = money;
                 axios
-                .post("/api/deposit", {
-                    username: username,
-                    amount: money,
-                },
-                {
-                    headers: {
-                      authorization: "Bearer " + localStorage.getItem("AuthorizedToken"),
+                  .post(
+                    "/api/deposit",
+                    {
+                      username: username,
+                      amount: money,
                     },
+                    {
+                      headers: {
+                        authorization:
+                          "Bearer " + localStorage.getItem("AuthorizedToken"),
+                      },
+                    }
+                  )
+                  .then(() => {
+                    console.log("success deposit");
+                    setOpen(true);
                   })
-                .then(() => {
-                  console.log("success deposit");
-                  setOpen(true);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
-            }}>Deposit</Button>
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              }}
+            >
+              Deposit
+            </Button>
           </Box>
         ) : (
           <Box>
-            <Button onClick={(e) => {
+            <Button
+              onClick={(e) => {
+                divRef.current.innerHTML = money;
                 axios
-                .post("/api/withdraw", {
-                    username: username,
-                    amount: money,
-                },
-                {
-                    headers: {
-                      authorization: "Bearer " + localStorage.getItem("AuthorizedToken"),
+                  .post(
+                    "/api/withdraw",
+                    {
+                      username: username,
+                      amount: money,
                     },
+                    {
+                      headers: {
+                        authorization:
+                          "Bearer " + localStorage.getItem("AuthorizedToken"),
+                      },
+                    }
+                  )
+                  .then(() => {
+                    console.log("success deposit");
+                    setOpen(true);
                   })
-                .then(() => {
-                  console.log("success deposit");
-                  setOpen(true);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
-            }}>Withdraw</Button>
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              }}
+            >
+              Withdraw
+            </Button>
           </Box>
         )}
       </Box>
+      <div id="xss" ref={divRef}></div>
     </Container>
   );
 }
