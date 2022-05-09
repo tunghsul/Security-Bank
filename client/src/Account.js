@@ -9,6 +9,8 @@ import {
   InputLabel,
   FilledInput,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -54,7 +56,11 @@ function Account(props) {
   const [depositMoney, setDepositMoney] = useState(0);
   const [withdrawMoney, setWithdrawMoney] = useState(0);
   const [balance, setBalance] = useState(0);
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
+  const [openErr, setOpenErr] = useState(false);
+  const [openErrMsg, setOpenErrMsg] = useState("");
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [openSuccessMsg, setOpenSuccessMsg] = useState("");
   const divRef = useRef(null);
   const navigate = useNavigate();
 
@@ -197,10 +203,25 @@ function Account(props) {
                       .then((res) => {
                         const balance = res.data.balance;
                         setBalance(balance);
+                        setOpenSuccessMsg("Successfully deposit the money");
+                        setOpenSuccess(true);
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                        setOpenErrMsg("Failed loading the balance");
+                        setOpenErr(true);
                       });
                   })
                   .catch((err) => {
                     console.log(err);
+                    const data = err.response.data;
+                    const status = err.response.status;
+                    if (status === 400) {
+                      setOpenErrMsg("Failed deposit: invalid input");
+                    } else {
+                      setOpenErrMsg("Failed deposit: " + data);
+                    }
+                    setOpenErr(true);
                   });
               }}
               sx={{
@@ -259,10 +280,24 @@ function Account(props) {
                       .then((res) => {
                         const balance = res.data.balance;
                         setBalance(balance);
+                        setOpenSuccessMsg("Successfully withdraw the money");
+                        setOpenSuccess(true);
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                        setOpenErrMsg("Failed loading the balance");
+                        setOpenErr(true);
                       });
                   })
                   .catch((err) => {
-                    console.log(err);
+                    const data = err.response.data;
+                    const status = err.response.status;
+                    if (status === 400) {
+                      setOpenErrMsg("Failed withdraw: Invalid Input");
+                    } else {
+                      setOpenErrMsg("Failed withdraw: " + data);
+                    }
+                    setOpenErr(true);
                   });
               }}
               sx={{
@@ -274,7 +309,31 @@ function Account(props) {
           </Box>
         </TabPanel>
       </Box>
-      <div id="xss" ref={divRef}></div>
+      <div id="xss" ref={divRef} style={{ display: "none" }}></div>
+      <Snackbar
+        open={openErr}
+        autoHideDuration={6000}
+        onClose={() => {
+          setOpenErr(false);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {openErrMsg}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openSuccess}
+        autoHideDuration={6000}
+        onClose={() => {
+          setOpenSuccess(false);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          {openSuccessMsg}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
