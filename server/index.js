@@ -97,8 +97,8 @@ app.post("/deposit", authenticationToken, (req, res) => {
   const amount = req.body.amount;
   const insertQuery =
     "UPDATE users SET users.balance = users.balance + " +
-    amount +
-    " WHERE name='" +
+    "TRUNCATE(" + amount + ", 2) " +
+    "WHERE name='" +
     userName +
     "'";
   db.query(insertQuery, (err, result) => {
@@ -115,8 +115,8 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   const amount = req.body.amount;
   const insertQuery =
     "UPDATE users SET users.balance = users.balance - " +
-    amount +
-    " WHERE name='" +
+    "TRUNCATE(" + amount + ", 2) " +
+    "WHERE name='" +
     userName +
     "'";
   db.query(insertQuery, (err, result) => {
