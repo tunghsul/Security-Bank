@@ -38,7 +38,7 @@ app.post("/login", (req, res) => {
   if (req.body.password != "") {
     password = req.body.password;
   }
-  const user = { name: userName };
+  
   const insertQuery =
     "select name, password from users where name ='" +
     userName +
@@ -54,6 +54,7 @@ app.post("/login", (req, res) => {
     if (result.length == 0 || result[0].password === undefined) {
       return res.sendStatus(404);
     }
+    const user = { name: result[0].name };
 
     const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: "300s",
