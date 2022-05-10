@@ -96,6 +96,11 @@ app.get("/account", authenticationToken, (req, res) => {
 app.post("/deposit", authenticationToken, (req, res) => {
   const userName = req.body.username;
   const amount = req.body.amount;
+
+  if(parseFloat(amount) > 4294967295.99){
+    return res.sendStatus(400);
+  }
+
   const insertQuery =
     "UPDATE users SET users.balance = users.balance + " +
     "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + // constrain to certain range and prevent rounding
@@ -114,6 +119,11 @@ app.post("/deposit", authenticationToken, (req, res) => {
 app.post("/withdraw", authenticationToken, (req, res) => {
   const userName = req.body.username;
   const amount = req.body.amount;
+
+  if(parseFloat(amount) > 4294967295.99){
+    return res.sendStatus(400);
+  }
+  
   const insertQuery =
     "UPDATE users SET users.balance = users.balance - " +
     "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " +  // constrain to certain range and prevent rounding
