@@ -20,9 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 app.post("/register", (req, res) => {
   const userName = req.body.username;
   const password = req.body.password;
+  const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
-  const InsertQuery = "INSERT INTO users (name, password) VALUES (?, ?)";
-  db.query(InsertQuery, [userName, password], (err, result) => {
+  const InsertQuery = "INSERT INTO users (name, password, balance) VALUES (?, ?, ?)";
+  db.query(InsertQuery, [userName, password, balance], (err, result) => {
     console.log(result);
     if (err) {
       return res.sendStatus(400);

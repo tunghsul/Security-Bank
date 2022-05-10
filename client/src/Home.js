@@ -17,8 +17,10 @@ function Home() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [openErr, setOpenErr] = useState(false);
+  const [openErrMsg, setOpenErrMsg] = useState("");
   const [userErr, setUserErr] = useState(false);
   const [pwdErr, setPwdErr] = useState(false);
+  const [balance, setBalance] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -104,7 +106,6 @@ function Home() {
         >
           <TextField
             variant="standard"
-            name="username"
             placeholder="Enter User Name"
             error={userErr}
             value={username}
@@ -133,11 +134,13 @@ function Home() {
           />
           <TextField
             variant="standard"
-            name="password"
             value={password}
             placeholder="Enter Password"
             type="password"
             error={pwdErr}
+            inputProps={{
+              maxLength: 127,
+            }}
             onChange={(e) => {
               setPassword(e.target.value);
             }}
@@ -161,6 +164,38 @@ function Home() {
               },
             }}
           />
+          {!open && (
+            <TextField
+              variant="standard"
+              placeholder="Enter initial balance"
+              type="number"
+              inputProps={{
+                maxLength: 127,
+              }}
+              onChange={(e) => {
+                setBalance(e.target.value);
+              }}
+              sx={{
+                paddingBottom: "10px",
+                marginBottom: "10px",
+                "& .MuiInput-input": {
+                  color: "white",
+                },
+                "& .MuiInput-root:before": {
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.8)",
+                },
+                "& .MuiInput-root:hover": {
+                  backgroundColor: "rgba(206, 141, 14, 0.26)",
+                },
+                "& .MuiInput-root:hover:not(.Mui-disabled):before": {
+                  borderBottom: "1.5px solid rgba(255, 255, 255, 0.8)",
+                },
+                "& .MuiInput-root:after": {
+                  borderBottom: "2px solid #ce8d0e",
+                },
+              }}
+            />
+          )}
           <Box
             sx={{
               padding: "10px",
@@ -196,6 +231,7 @@ function Home() {
                       })
                       .catch((err) => {
                         console.log(err);
+                        setOpenErrMsg("Failed Login!");
                         setOpenErr(true);
                       });
                     console.log(username, password);
@@ -246,6 +282,7 @@ function Home() {
                       .post("/api/register", {
                         username: username,
                         password: password,
+                        balance: balance,
                       })
                       .then(() => {
                         console.log("success register");
@@ -254,6 +291,13 @@ function Home() {
                       })
                       .catch((err) => {
                         console.log(err);
+                        const data = err.response.data; 
+                        if (balance < 0) {
+                          setOpenErrMsg("Failed register: Initial balance cannot be negative number");
+                        }
+                        else {
+                          setOpenErrMsg("Failed register: " + data);
+                        }
                         setOpenErr(true);
                       });
                     console.log(username, password);
@@ -292,13 +336,15 @@ function Home() {
         </Box>
       </Box>
       <Snackbar
-        severity="error"
         open={openErr}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
+        onClose={() => {
+          setOpenErr(false);
+        }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error" sx={{ width: "100%" }}>
-          Failed login/register
+          {openErrMsg}
         </Alert>
       </Snackbar>
     </Container>
