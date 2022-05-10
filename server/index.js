@@ -22,7 +22,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
-  const InsertQuery = "INSERT INTO users (name, password, balance) VALUES (?, ?, ?)";
+  const InsertQuery = "INSERT INTO users (name, password, balance) VALUES (?, ?, TRUNCATE(?, 2))"; // updated to prevent rounding
   db.query(InsertQuery, [userName, password, balance], (err, result) => {
     console.log(result);
     if (err) {
@@ -98,7 +98,7 @@ app.post("/deposit", authenticationToken, (req, res) => {
   const amount = req.body.amount;
   const insertQuery =
     "UPDATE users SET users.balance = users.balance + " +
-    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + 
+    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + // constrain to certain range and prevent rounding
     "WHERE name='" +
     userName +
     "'";
@@ -116,7 +116,7 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   const amount = req.body.amount;
   const insertQuery =
     "UPDATE users SET users.balance = users.balance - " +
-    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + 
+    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " +  // constrain to certain range and prevent rounding
     "WHERE name='" +
     userName +
     "'";
