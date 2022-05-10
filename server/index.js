@@ -50,7 +50,7 @@ app.post("/login", (req, res) => {
     if (err) {
       return res.sendStatus(400);
     }
-
+    
     if (result.length == 0 || result[0].password === undefined) {
       return res.sendStatus(404);
     }
@@ -97,7 +97,7 @@ app.post("/deposit", authenticationToken, (req, res) => {
   const amount = req.body.amount;
   const insertQuery =
     "UPDATE users SET users.balance = users.balance + " +
-    "TRUNCATE(" + amount + ", 2) " +
+    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + 
     "WHERE name='" +
     userName +
     "'";
@@ -115,7 +115,7 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   const amount = req.body.amount;
   const insertQuery =
     "UPDATE users SET users.balance = users.balance - " +
-    "TRUNCATE(" + amount + ", 2) " +
+    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + 
     "WHERE name='" +
     userName +
     "'";
