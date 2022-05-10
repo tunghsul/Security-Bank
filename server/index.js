@@ -22,6 +22,11 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
+
+  if(parseFloat(balance) > 4294967295.99){
+    return res.sendStatus(400);
+  }
+
   const InsertQuery = "INSERT INTO users (name, password, balance) VALUES (?, ?, TRUNCATE(?, 2))"; // updated to prevent rounding
   db.query(InsertQuery, [userName, password, balance], (err, result) => {
     console.log(result);
