@@ -45,14 +45,11 @@ app.post("/login", (req, res) => {
     password = req.body.password;
   }
   
+  // REMOVED SQL INJECTION
   const insertQuery =
-    "select name, password from users where name ='" +
-    userName +
-    "' and password ='" +
-    password +
-    "';";
+    "SELECT name, password FROM users WHERE name = ? and password = ?";
 
-  db.query(insertQuery, (err, result) => {
+  db.query(insertQuery, [userName, password],  (err, result) => {
     if (err) {
       return res.sendStatus(400);
     }
@@ -106,13 +103,13 @@ app.post("/deposit", authenticationToken, (req, res) => {
     return res.sendStatus(400);
   }
 
+  // REMOVED SQL INJECTION
   const insertQuery =
     "UPDATE users SET users.balance = users.balance + " +
-    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " + // constrain to certain range and prevent rounding
-    "WHERE name='" +
-    userName +
-    "'";
-  db.query(insertQuery, (err, result) => {
+    "IF(TRUNCATE(?, 2) > 4294967295.99, 4294967295.99, TRUNCATE(?, 2)) " + // constrain to certain range and prevent rounding
+    "WHERE name= ?";
+    
+  db.query(insertQuery,[amount, amount, userName], (err, result) => {
     if (err) {
       return res.sendStatus(400);
     }
@@ -129,13 +126,12 @@ app.post("/withdraw", authenticationToken, (req, res) => {
     return res.sendStatus(400);
   }
   
+  // REMOVED SQL INJECTION
   const insertQuery =
     "UPDATE users SET users.balance = users.balance - " +
-    "IF(TRUNCATE(" + amount + ", 2) > 4294967295.99, 4294967295.99, TRUNCATE(" + amount + ", 2)) " +  // constrain to certain range and prevent rounding
-    "WHERE name='" +
-    userName +
-    "'";
-  db.query(insertQuery, (err, result) => {
+    "IF(TRUNCATE(?, 2) > 4294967295.99, 4294967295.99, TRUNCATE(?, 2)) " +  // constrain to certain range and prevent rounding
+    "WHERE name= ?";
+  db.query(insertQuery, [amount, amount, userName], (err, result) => {
     if (err) {
       return res.sendStatus(400);
     }
