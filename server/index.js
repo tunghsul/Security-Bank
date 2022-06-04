@@ -50,15 +50,16 @@ app.post("/login", (req, res) => {
     "SELECT name, password FROM users WHERE name = ?";
 
   db.query(insertQuery, [userName], (err, result) => {
+    console.log(bcrypt.compare(userName, result[0].name));
     if (err) {
       return res.sendStatus(400);
     }
 
-    bcrypt.compare(userName, result[0].name, function (err, res) {
-      // res === true
-    });
+    // bcrypt.compare(userName, result[0].name, function (err, res) {
+    //   // res === true
+    // });
     
-    console.log(JSON.stringify(result));
+    // console.log(JSON.stringify(result));
 
     if (result[0].password !== password) {
       return res.sendStatus(404);
