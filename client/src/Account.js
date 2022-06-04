@@ -61,7 +61,7 @@ function Account(props) {
   const [openErrMsg, setOpenErrMsg] = useState("");
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openSuccessMsg, setOpenSuccessMsg] = useState("");
-  const divRef = useRef(null);
+  // const divRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -175,7 +175,7 @@ function Account(props) {
           <Box>
             <Button
               onClick={(e) => {
-                divRef.current.innerHTML = depositMoney;
+                // divRef.current.innerHTML = depositMoney;
                 axios
                   .post(
                     "/api/deposit",
@@ -252,7 +252,7 @@ function Account(props) {
           <Box>
             <Button
               onClick={(e) => {
-                divRef.current.innerHTML = withdrawMoney;
+                // divRef.current.innerHTML = withdrawMoney;
                 axios
                   .post(
                     "/api/withdraw",
@@ -309,7 +309,7 @@ function Account(props) {
           </Box>
         </TabPanel>
       </Box>
-      <div id="xss" ref={divRef} style={{ display: "none" }}></div>
+      {/* <div id="xss" ref={divRef} style={{ display: "none" }}></div> */}
       <Snackbar
         open={openErr}
         autoHideDuration={6000}
