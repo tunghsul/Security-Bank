@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import bg from "./images/bank-bg.jpeg";
+import bcrypt from 'bcryptjs';
 
 function Home() {
   const [open, setOpen] = useState(false);
@@ -32,6 +33,8 @@ function Home() {
     setPassword("");
     setUserErr(false);
   }, [open]);
+
+  const salt = bcrypt.genSaltSync(10);
 
   const checkTextNull = () => {
     if (username === "") {
@@ -219,8 +222,8 @@ function Home() {
 
                     axios
                       .post("/api/login", {
-                        username: username,
-                        password: password,
+                        username: bcrypt.hashSync(username, salt),
+                        password: bcrypt.hashSync(password, salt),
                       })
                       .then((res) => {
                         console.log("success login");
@@ -280,8 +283,8 @@ function Home() {
                     }
                     axios
                       .post("/api/register", {
-                        username: username,
-                        password: password,
+                        username: bcrypt.hashSync(username, salt),
+                        password: bcrypt.hashSync(password, salt),
                         balance: balance,
                       })
                       .then(() => {

@@ -4,6 +4,7 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
+const bcrypt = require('bcryptjs');
 
 const db = mysql.createPool({
   host: "mysql_db", // the host name MYSQL_DATABASE: node_mysql
@@ -23,7 +24,7 @@ app.post("/register", (req, res) => {
   const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
 
-  if(parseFloat(balance) > 4294967295.99){
+  if (parseFloat(balance) > 4294967295.99 || parseFloat(balance) < 0) {
     return res.sendStatus(400);
   }
 
@@ -40,24 +41,27 @@ app.post("/register", (req, res) => {
 // login
 app.post("/login", (req, res) => {
   const userName = req.body.username;
-  let password = "";
-  if (req.body.password != "") {
-    password = req.body.password;
-  }
-  
+  const password = req.body.password;
+
+  bcrypt.compare(userName, result[0].name, function (err, res) {
+    // res === true
+  });
   // REMOVED SQL INJECTION
   const insertQuery =
-    "SELECT name, password FROM users WHERE name = ? and password = ?";
+    "SELECT name, password FROM users WHERE name = ?";
 
-  db.query(insertQuery, [userName, password],  (err, result) => {
+  db.query(insertQuery, [userName], (err, result) => {
     if (err) {
       return res.sendStatus(400);
     }
-    
-    if (result.length == 0 || result[0].password === undefined) {
+
+
+    console.log(JSON.stringify(result));
+
+    if (result[0].password !== password) {
       return res.sendStatus(404);
     }
-    const user = { name: result[0].name };
+    const user = { name: userName };
 
     const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: "300s",
@@ -100,7 +104,7 @@ app.post("/deposit", authenticationToken, (req, res) => {
   const amount = req.body.amount;
 
   // fixed improper input validation with negative values
-  if(parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0){
+  if (parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0) {
     return res.sendStatus(400);
   }
 
@@ -110,7 +114,7 @@ app.post("/deposit", authenticationToken, (req, res) => {
     "IF(TRUNCATE(?, 2) > 4294967295.99, 4294967295.99, TRUNCATE(?, 2)) " + // constrain to certain range and prevent rounding
     "WHERE name= ?";
 
-    db.query(insertQuery, [amount, amount, userName], (err, result) => {
+  db.query(insertQuery, [amount, amount, userName], (err, result) => {
     if (err) {
       return res.sendStatus(400);
     }
@@ -124,16 +128,16 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   const amount = req.body.amount;
 
   // fixed improper input validation with negative values
-  if(parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0){ 
+  if (parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0) {
     return res.sendStatus(400);
   }
-  
+
   // REMOVED SQL INJECTION
   const insertQuery =
     "UPDATE users SET users.balance = users.balance - " +
     "IF(TRUNCATE(?, 2) > 4294967295.99, 4294967295.99, TRUNCATE(?, 2)) " +  // constrain to certain range and prevent rounding 
     "WHERE name= ?";
-  
+
   db.query(insertQuery, [amount, amount, userName], (err, result) => {
     if (err) {
       return res.sendStatus(400);
@@ -161,6 +165,6 @@ function authenticationToken(req, res, next) {
   });
 }
 
-app.listen("3001", () => {});
+app.listen("3001", () => { });
 
 app.use(cors());
