@@ -24,6 +24,7 @@ app.post("/register", (req, res) => {
   const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
 
+   // fixed improper input validation with negative values
   if (parseFloat(balance) > 4294967295.99 || parseFloat(balance) < 0) {
     return res.sendStatus(400);
   }
@@ -43,9 +44,7 @@ app.post("/login", (req, res) => {
   const userName = req.body.username;
   const password = req.body.password;
 
-  bcrypt.compare(userName, result[0].name, function (err, res) {
-    // res === true
-  });
+  
   // REMOVED SQL INJECTION
   const insertQuery =
     "SELECT name, password FROM users WHERE name = ?";
@@ -55,7 +54,10 @@ app.post("/login", (req, res) => {
       return res.sendStatus(400);
     }
 
-
+    bcrypt.compare(userName, result[0].name, function (err, res) {
+      // res === true
+    });
+    
     console.log(JSON.stringify(result));
 
     if (result[0].password !== password) {
