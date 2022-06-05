@@ -61,7 +61,6 @@ function Account(props) {
   const [openErrMsg, setOpenErrMsg] = useState("");
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openSuccessMsg, setOpenSuccessMsg] = useState("");
-  // const divRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,13 +83,6 @@ function Account(props) {
         navigate("/");
       });
   }, []);
-
-  function a11yProps(index) {
-    return {
-      id: `simple-tab-${index}`,
-      "aria-controls": `simple-tabpanel-${index}`,
-    };
-  }
 
   const handleChange = (event, newValue) => {
     setValue(newValue);

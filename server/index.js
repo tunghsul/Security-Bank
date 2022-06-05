@@ -5,6 +5,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
 const bcrypt = require('bcryptjs');
+const { encrypt, decrypt } = require("./encryptionHandler");
 
 const db = mysql.createPool({
   host: "mysql_db", // the host name MYSQL_DATABASE: node_mysql
@@ -29,9 +30,12 @@ app.post("/register", (req, res) => {
     return res.sendStatus(400);
   }
 
-  const InsertQuery = "INSERT INTO users (name, password, balance) VALUES (?, ?, TRUNCATE(?, 2))"; // updated to prevent rounding
-  db.query(InsertQuery, [userName, password, balance], (err, result) => {
-    console.log(result);
+  const hashedPassword = encrypt(password);
+  console.log("hashedPassword: "+ JSON.stringify(hashedPassword));
+
+  const InsertQuery = "INSERT INTO users (name, password, balance, iv) VALUES (?, ?, TRUNCATE(?, 2), ?)"; // updated to prevent rounding
+  db.query(InsertQuery, [userName, hashedPassword.password, balance, hashedPassword.iv], (err, result) => {
+    console.log("query result: "+result);
     if (err) {
       return res.sendStatus(400);
     }
@@ -43,27 +47,32 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const userName = req.body.username;
   const password = req.body.password;
-
   
   // REMOVED SQL INJECTION
   const insertQuery =
-    "SELECT name, password FROM users WHERE name = ?";
+    "SELECT password, iv FROM users WHERE name = ?";
 
   db.query(insertQuery, [userName], (err, result) => {
-    console.log(bcrypt.compare(userName, result[0].name));
+
+    console.log(JSON.stringify(result));
+
     if (err) {
       return res.sendStatus(400);
     }
 
-    // bcrypt.compare(userName, result[0].name, function (err, res) {
-    //   // res === true
-    // });
-    
-    // console.log(JSON.stringify(result));
-
-    if (result[0].password !== password) {
+    if (result.length == 0) {
       return res.sendStatus(404);
     }
+
+    const decryptedPassword = decrypt({
+      password: result[0].password,
+      iv: result[0].iv,
+    });
+
+    if (decryptedPassword !== password) {
+      return res.sendStatus(403);
+    }
+
     const user = { name: userName };
 
     const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {

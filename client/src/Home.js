@@ -37,19 +37,18 @@ function Home() {
   const salt = bcrypt.genSaltSync(10);
 
   const checkTextNull = () => {
-    if (username === "") {
-      // || password === "") {
+    if (username === "" || password === "") {
       if (username === "") {
         setUserErr(true);
       } else {
         setUserErr(false);
       }
 
-      // if (password === "") {
-      //   setPwdErr(true);
-      // } else {
-      //   setPwdErr(false);
-      // }
+      if (password === "") {
+        setPwdErr(true);
+      } else {
+        setPwdErr(false);
+      }
       return true;
     }
 
@@ -222,8 +221,10 @@ function Home() {
 
                     axios
                       .post("/api/login", {
-                        username: bcrypt.hashSync(username, salt),
-                        password: bcrypt.hashSync(password, salt),
+                        username: username,
+                        password: password,
+                        // username: bcrypt.hashSync(username, salt),
+                        // password: bcrypt.hashSync(password, salt),
                       })
                       .then((res) => {
                         console.log("success login");
@@ -283,8 +284,10 @@ function Home() {
                     }
                     axios
                       .post("/api/register", {
-                        username: bcrypt.hashSync(username, salt),
-                        password: bcrypt.hashSync(password, salt),
+                        username: username,
+                        password: password,
+                        // username: bcrypt.hashSync(username, salt),
+                        // password: bcrypt.hashSync(password, salt),
                         balance: balance,
                       })
                       .then(() => {
