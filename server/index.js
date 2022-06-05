@@ -25,8 +25,8 @@ app.post("/register", (req, res) => {
   const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
 
-   // fixed improper input validation with negative values
-  if (parseFloat(balance) > 4294967295.99 || parseFloat(balance) < 0) {
+   // fixed improper input validation with negative values and leading zeros.
+  if (parseFloat(balance) > 4294967295.99 || parseFloat(balance) < 0 || Number(balance).toString() !== balance) {
     return res.sendStatus(400);
   }
 
@@ -115,8 +115,8 @@ app.post("/deposit", authenticationToken, (req, res) => {
   const userName = res.locals.user.name;
   const amount = req.body.amount;
 
-  // fixed improper input validation with negative values
-  if (parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0) {
+  // fixed improper input validation with negative values and leading zeros
+  if (parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0 || Number(amount).toString() !== amount) {
     return res.sendStatus(400);
   }
 
@@ -140,7 +140,7 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   const amount = req.body.amount;
 
   // fixed improper input validation with negative values
-  if (parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0) {
+  if (parseFloat(amount) > 4294967295.99 || parseFloat(amount) < 0 || Number(amount).toString() !== amount) {
     return res.sendStatus(400);
   }
 
