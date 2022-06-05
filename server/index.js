@@ -112,7 +112,7 @@ app.get("/account", authenticationToken, (req, res) => {
 });
 
 app.post("/deposit", authenticationToken, (req, res) => {
-  const userName = req.body.username;
+  const userName = res.locals.user.name;
   const amount = req.body.amount;
 
   // fixed improper input validation with negative values
@@ -136,7 +136,7 @@ app.post("/deposit", authenticationToken, (req, res) => {
 });
 
 app.post("/withdraw", authenticationToken, (req, res) => {
-  const userName = req.body.username;
+  const userName = res.locals.user.name;
   const amount = req.body.amount;
 
   // fixed improper input validation with negative values
@@ -159,6 +159,10 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   });
 });
 
+app.post("/encrypt", (req, res) => {
+  return res.status(200).send(encrypt(res.body.value));
+});
+
 function authenticationToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -173,6 +177,7 @@ function authenticationToken(req, res, next) {
     }
 
     req.user = user;
+    res.locals.user = user;
     next();
   });
 }
