@@ -4,8 +4,8 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
-const bcrypt = require('bcryptjs');
 const { encrypt, decrypt } = require("./encryptionHandler");
+const CryptoJS = require("crypto-js");
 
 const db = mysql.createPool({
   host: "mysql_db", // the host name MYSQL_DATABASE: node_mysql
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 // register an account to the database
 app.post("/register", (req, res) => {
   const userName = req.body.username;
-  const password = req.body.password;
+  let password = req.body.password;
   const balance = req.body.balance;
   // password = await bcrypt.hash(password, 8);
 
@@ -29,6 +29,9 @@ app.post("/register", (req, res) => {
   if (parseFloat(balance) > 4294967295.99 || parseFloat(balance) < 0 || Number(balance).toString() !== balance) {
     return res.sendStatus(400);
   }
+
+  password = CryptoJS.AES.decrypt(password, "mswe266p").toString();
+  console.log("Register decrypt pwd: " + password);
 
   const hashedPassword = encrypt(password);
   console.log("hashedPassword: "+ JSON.stringify(hashedPassword));
@@ -46,7 +49,7 @@ app.post("/register", (req, res) => {
 // login
 app.post("/login", (req, res) => {
   const userName = req.body.username;
-  const password = req.body.password;
+  let password = req.body.password;
   
   // REMOVED SQL INJECTION
   const insertQuery =
@@ -68,6 +71,9 @@ app.post("/login", (req, res) => {
       password: result[0].password,
       iv: result[0].iv,
     });
+
+    password = CryptoJS.AES.decrypt(password, "mswe266p").toString();
+    console.log("Login decrypt pwd: " + password);
 
     if (decryptedPassword !== password) {
       return res.sendStatus(403);
