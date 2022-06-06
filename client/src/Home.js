@@ -111,6 +111,11 @@ function Home() {
             value={username}
             onChange={(e) => {
               setUsername(e.target.value);
+                if (/[^_\-\\.0-9a-z]/.test(e.target.value)){
+                    setUserErr(true);
+                } else {
+                    setUserErr(false);
+                }
             }}
             sx={{
               paddingBottom: "10px",
@@ -143,6 +148,11 @@ function Home() {
             }}
             onChange={(e) => {
               setPassword(e.target.value);
+              if (/[^_\-\\.0-9a-z]/.test(e.target.value)){
+                  setPwdErr(true);
+              } else {
+                  setPwdErr(false);
+              }
             }}
             sx={{
               paddingBottom: "10px",
@@ -278,6 +288,17 @@ function Home() {
                     if (checkTextNull()) {
                       return;
                     }
+                    if (pwdErr === true || userErr === true) {
+                        return;
+                    }
+                    if (username.length > 127 || username.length < 8) {
+                        setUserErr(true);
+                        return;
+                      }
+                    if (password.length > 127 || password.length < 8) {
+                        setPwdErr(true);
+                        return;
+                    }
                     axios
                       .post("/api/register", {
                         username: username,
@@ -291,7 +312,7 @@ function Home() {
                       })
                       .catch((err) => {
                         console.log(err);
-                        const data = err.response.data; 
+                        const data = err.response.data;
                         if (balance < 0) {
                           setOpenErrMsg("Failed register: Initial balance cannot be negative number");
                         }
