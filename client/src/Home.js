@@ -220,10 +220,7 @@ function Home() {
                     axios
                       .post("/api/login", {
                         username: username,
-                        // password: password,
                         password: aes.encrypt(password, "mswe266p").toString(),
-                        // username: bcrypt.hashSync(username, salt),
-                        // password: bcrypt.hashSync(password, salt),
                       })
                       .then((res) => {
                         console.log("success login");
@@ -284,10 +281,7 @@ function Home() {
                     axios
                       .post("/api/register", {
                         username: username,
-                        // password: password,
                         password: aes.encrypt(password, "mswe266p").toString(),
-                        // username: bcrypt.hashSync(username, salt),
-                        // password: bcrypt.hashSync(password, salt),
                         balance: balance,
                       })
                       .then(() => {
