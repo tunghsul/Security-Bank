@@ -165,10 +165,6 @@ app.post("/withdraw", authenticationToken, (req, res) => {
   });
 });
 
-app.post("/encrypt", (req, res) => {
-  return res.status(200).send(encrypt(res.body.value));
-});
-
 function authenticationToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
