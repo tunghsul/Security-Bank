@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import bg from "./images/bank-bg.jpeg";
-import aes from 'crypto-js/aes';
+import aes from "crypto-js/aes";
 
 function Home() {
   const [open, setOpen] = useState(false);
@@ -20,7 +20,9 @@ function Home() {
   const [openErr, setOpenErr] = useState(false);
   const [openErrMsg, setOpenErrMsg] = useState("");
   const [userErr, setUserErr] = useState(false);
+  const [userSyntaxErrMsg, setUserSyntaxErrMsg] = useState("");
   const [pwdErr, setPwdErr] = useState(false);
+  const [pwdSyntaxErrMsg, setPwdSyntaxErrMsg] = useState("");
   const [balance, setBalance] = useState(0);
   const navigate = useNavigate();
 
@@ -47,6 +49,32 @@ function Home() {
       } else {
         setPwdErr(false);
       }
+      return true;
+    }
+
+    return false;
+  };
+
+  const checkInputValidation = () => {
+    if (pwdErr === true || userErr === true) {
+      if (userErr) {
+        setUserSyntaxErrMsg("Only '_, -, ., 0-9, a-z' are allowed.");
+      }
+      if (pwdErr) {
+        setPwdSyntaxErrMsg("Only '_, -, ., 0-9, a-z' are allowed.");
+      }
+      return true;
+    }
+
+    if (username.length > 127 || username.length < 8) {
+      setUserSyntaxErrMsg("Length should between 8 and 127");
+      setUserErr(true);
+      return true;
+    }
+
+    if (password.length > 127 || password.length < 8) {
+      setPwdSyntaxErrMsg("Length should between 8 and 127");
+      setPwdErr(true);
       return true;
     }
 
@@ -111,11 +139,11 @@ function Home() {
             value={username}
             onChange={(e) => {
               setUsername(e.target.value);
-                if (/[^_\-\\.0-9a-z]/.test(e.target.value)){
-                    setUserErr(true);
-                } else {
-                    setUserErr(false);
-                }
+              if (/[^_\-\\.0-9a-z]/.test(e.target.value)) {
+                setUserErr(true);
+              } else {
+                setUserErr(false);
+              }
             }}
             sx={{
               paddingBottom: "10px",
@@ -137,6 +165,11 @@ function Home() {
               },
             }}
           />
+          {userErr && !open && (
+            <Typography sx={{ color: "red", fontSize: "10px" }}>
+              {userSyntaxErrMsg}
+            </Typography>
+          )}
           <TextField
             variant="standard"
             value={password}
@@ -148,10 +181,10 @@ function Home() {
             }}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (/[^_\-\\.0-9a-z]/.test(e.target.value)){
-                  setPwdErr(true);
+              if (/[^_\-\\.0-9a-z]/.test(e.target.value)) {
+                setPwdErr(true);
               } else {
-                  setPwdErr(false);
+                setPwdErr(false);
               }
             }}
             sx={{
@@ -169,11 +202,16 @@ function Home() {
               "& .MuiInput-root:hover:not(.Mui-disabled):before": {
                 borderBottom: "1.5px solid rgba(255, 255, 255, 0.8)",
               },
-              "& .MuiInput-root:after": {
-                borderBottom: "2px solid #ce8d0e",
-              },
+              // "& .MuiInput-root:after": {
+              //   borderBottom: "2px solid #ce8d0e",
+              // },
             }}
           />
+          {pwdErr && !open && (
+            <Typography sx={{ color: "red", fontSize: "10px" }} open={pwdErr}>
+              {pwdSyntaxErrMsg}
+            </Typography>
+          )}
           {!open && (
             <TextField
               variant="standard"
@@ -226,7 +264,7 @@ function Home() {
                     if (checkTextNull()) {
                       return;
                     }
-                    
+
                     axios
                       .post("/api/login", {
                         username: username,
@@ -285,20 +323,10 @@ function Home() {
                 <Button
                   variant="outlined"
                   onClick={(e) => {
-                    if (checkTextNull()) {
+                    if (checkTextNull() || checkInputValidation()) {
                       return;
                     }
-                    if (pwdErr === true || userErr === true) {
-                        return;
-                    }
-                    if (username.length > 127 || username.length < 8) {
-                        setUserErr(true);
-                        return;
-                      }
-                    if (password.length > 127 || password.length < 8) {
-                        setPwdErr(true);
-                        return;
-                    }
+
                     axios
                       .post("/api/register", {
                         username: username,
@@ -314,9 +342,10 @@ function Home() {
                         console.log(err);
                         const data = err.response.data;
                         if (balance < 0) {
-                          setOpenErrMsg("Failed register: Initial balance cannot be negative number");
-                        }
-                        else {
+                          setOpenErrMsg(
+                            "Failed register: Initial balance cannot be negative number"
+                          );
+                        } else {
                           setOpenErrMsg("Failed register: " + data);
                         }
                         setOpenErr(true);
